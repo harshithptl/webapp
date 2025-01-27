@@ -2,7 +2,6 @@ package com.example.webapp.controller;
 
 import com.example.webapp.service.HealthCheckService;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,8 +14,11 @@ import static com.example.webapp.utils.GeneralUtils.createResponse;
 @RequestMapping("/healthz")
 public class HealthCheckController {
 
-    @Autowired
-    private HealthCheckService healthCheckService;
+    private final HealthCheckService healthCheckService;
+
+    public HealthCheckController(HealthCheckService healthCheckService) {
+        this.healthCheckService = healthCheckService;
+    }
 
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<Void> healthCheck(HttpServletRequest request) {

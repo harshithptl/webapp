@@ -3,7 +3,6 @@ package com.example.webapp.service;
 import com.example.webapp.dao.HealthCheckDao;
 import com.example.webapp.model.HealthCheck;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -17,8 +16,11 @@ import static com.example.webapp.utils.GeneralUtils.createResponse;
 @Service
 public class HealthCheckServiceImpl implements HealthCheckService {
 
-    @Autowired
-    private HealthCheckDao healthCheckDao;
+    private final HealthCheckDao healthCheckDao;
+
+    public HealthCheckServiceImpl(HealthCheckDao healthCheckDao) {
+        this.healthCheckDao = healthCheckDao;
+    }
 
     @Override
     public ResponseEntity<Void> healthCheck(HttpServletRequest request) {
