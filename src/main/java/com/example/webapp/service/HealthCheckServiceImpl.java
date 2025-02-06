@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Map;
 
 import static com.example.webapp.utils.GeneralUtils.createResponse;
 
@@ -34,6 +35,10 @@ public class HealthCheckServiceImpl implements HealthCheckService {
     }
 
     private boolean validateRequest(HttpServletRequest request) {
+        Map<String, String[]> parameterMap = request.getParameterMap();
+        if (parameterMap != null && !parameterMap.isEmpty()) {
+            return false;
+        }
         String contentLength = request.getHeader("Content-Length");
         if (contentLength != null && Integer.parseInt(contentLength) > 0) {
             return false;
