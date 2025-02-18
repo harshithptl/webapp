@@ -41,8 +41,11 @@ jobs:
       - name: Run Unit Tests
         run: mvn test
         env:
-          POSTGRES_HOST: localhost
-          POSTGRES_PORT: 5432
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: testdb
+          SPRING_APPLICATION_JSON: |
+            {
+              "spring.datasource.url": "jdbc:postgresql://localhost:5432/testdb",
+              "spring.datasource.username": "postgres",
+              "spring.datasource.password": "postgres",
+              "spring.datasource.driver-class-name": "org.postgresql.Driver",
+              "spring.jpa.hibernate.ddl-auto": "update"
+            }
