@@ -24,6 +24,10 @@ jobs:
         run: |
           packer fmt -check -diff src/main/scripts
 
+      - name: Initialize packer
+        run: |
+          packer init src/main/scripts    
+
       - name: Validate Packer template
         run: |
           packer validate src/main/scripts
