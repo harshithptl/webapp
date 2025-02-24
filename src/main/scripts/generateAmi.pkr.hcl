@@ -48,8 +48,7 @@ variable "webapp_zip_path" {
 }
 
 locals {
-  ts       = formattimestamp("20060102150405", timestamp())
-  ami_name = "webapp-${ts}"
+  ami_name = "webapp_${formatdate("YYYY_MM_DD_HH_mm_ss", timestamp())}"
 }
 
 # BUILDERS
