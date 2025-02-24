@@ -112,7 +112,7 @@ build {
     ]
     inline = [
       "chmod +x /tmp/setup.sh",
-      "sudo /tmp/setup.sh"
+      "sudo -E /tmp/setup.sh"
     ]
   }
 }
