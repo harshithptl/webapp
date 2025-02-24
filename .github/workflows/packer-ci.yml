@@ -26,7 +26,13 @@ jobs:
 
       - name: Initialize packer
         run: |
-          packer init src/main/scripts    
+          packer init src/main/scripts
+
+      - name: Create dummy artifact if not present
+        run: |
+          if [ ! -f dummy.zip ]; then
+            echo "Dummy file" > src/main/scripts/dummy.zip
+          fi
 
       - name: Validate Packer template
         run: |

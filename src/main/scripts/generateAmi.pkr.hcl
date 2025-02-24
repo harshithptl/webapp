@@ -44,7 +44,7 @@ variable "POSTGRES_DB" {
 
 variable "webapp_zip_path" {
   type    = string
-  default = "./webapp.zip"
+  default = "./dummy.zip"
 }
 
 locals {
@@ -88,7 +88,7 @@ build {
   ]
 
   provisioner "file" {
-    source      = "./src/main/scripts/setup.sh"
+    source      = "./setup.sh"
     destination = "/tmp/setup.sh"
   }
 
@@ -98,7 +98,7 @@ build {
   }
 
   provisioner "file" {
-    source      = "./src/main/scripts/webapp.service"
+    source      = "./webapp.service"
     destination = "/tmp/webapp.service"
   }
 
