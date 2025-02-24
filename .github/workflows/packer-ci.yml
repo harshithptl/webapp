@@ -31,7 +31,7 @@ jobs:
       - name: Create dummy artifact if not present
         run: |
           if [ ! -f dummy.zip ]; then
-            echo "Dummy file" > src/main/scripts/dummy.zip
+            echo "Dummy file" > dummy.zip
           fi
 
       - name: Validate Packer template

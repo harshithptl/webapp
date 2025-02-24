@@ -88,7 +88,7 @@ build {
   ]
 
   provisioner "file" {
-    source      = "./setup.sh"
+    source      = "./src/main/scripts/setup.sh"
     destination = "/tmp/setup.sh"
   }
 
@@ -98,7 +98,7 @@ build {
   }
 
   provisioner "file" {
-    source      = "./webapp.service"
+    source      = "./src/main/scripts/webapp.service"
     destination = "/tmp/webapp.service"
   }
 
