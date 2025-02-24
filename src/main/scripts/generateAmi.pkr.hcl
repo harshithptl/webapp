@@ -48,7 +48,8 @@ variable "webapp_zip_path" {
 }
 
 locals {
-  ami_name = "webapp_${formatdate("YYYY_MM_DD", timestamp())}"
+  ts       = formattimestamp("20060102150405", timestamp())
+  ami_name = "webapp-${ts}"
 }
 
 # BUILDERS
@@ -104,6 +105,8 @@ build {
 
   provisioner "shell" {
     environment_vars = [
+      "DEBIAN_FRONTEND=noninteractive",
+      "CHECKPOINT_DISABLE=1",
       "POSTGRES_USER=${var.POSTGRES_USER}",
       "POSTGRES_PASSWORD=${var.POSTGRES_PASSWORD}",
       "POSTGRES_DB=${var.POSTGRES_DB}"

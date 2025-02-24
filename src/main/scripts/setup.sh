@@ -51,7 +51,7 @@ echo "csye6225user:$PASSWORD" | sudo chpasswd
 
 echo "Successfully set password for user 'csye6225user'"
 
- Create PostgreSQL user and grant privileges
+# Create PostgreSQL user and grant privileges
 echo "Creating PostgreSQL user and granting privileges..."
 sudo sed -i "s/local   all             all             peer/local   all             all             md5/" /etc/postgresql/*/main/pg_hba.conf
 sudo sed -i "s/host    all             all             127.0.0.1\/32            trust/host    all             all             127.0.0.1\/32            md5/" /etc/postgresql/*/main/pg_hba.conf
