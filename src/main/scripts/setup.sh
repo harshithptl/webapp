@@ -17,14 +17,14 @@ sudo unzip /tmp/webapp.zip -d /opt/csye6225
 
 # Run Maven build to install dependencies and compile the application
 echo "Running Maven build..."
-cd /opt/csye6225/webapp
+cd /opt/csye6225
 mvn clean install -DskipTests
 
 
 # Create the application.properties file with PostgreSQL credentials
 echo "Creating application.properties..."
-sudo mkdir -p /opt/csye6225/webapp/src/main/resources
-sudo tee /opt/csye6225/webapp/src/main/resources/application.properties <<EOF >/dev/null
+sudo mkdir -p /opt/csye6225/src/main/resources
+sudo tee /opt/csye6225/src/main/resources/application.properties <<EOF >/dev/null
 spring.datasource.url=jdbc:postgresql://localhost:5432/${POSTGRES_DB}
 spring.datasource.username=${POSTGRES_USER}
 spring.datasource.password=${POSTGRES_PASSWORD}
