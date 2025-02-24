@@ -89,7 +89,7 @@ jobs:
               -var "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" \
               -var "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" \
               -var "webapp_zip_path=./webapp.zip" \
-                ./src/main/scripts/generateAmi.pkr.hcl
+              ./src/main/scripts/generateAmi.pkr.hcl
 
       - name: Build AWS & GCP images
         env:
@@ -102,4 +102,4 @@ jobs:
             -var "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" \
             -var "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" \
             -var "webapp_zip_path=./webapp.zip" \
-              ./src/main/scripts/generateAmi.pkr.hcl
+            ./src/main/scripts/generateAmi.pkr.hcl
