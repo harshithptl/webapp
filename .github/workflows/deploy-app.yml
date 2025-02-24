@@ -69,7 +69,7 @@ jobs:
 
       - name: Zip up repo
         run: |
-          zip -r webapp.zip . -x "*/.git/*"
+          zip -r webapp.zip . -x './.git/*' -x '*/.git/*'
 
       - name: Install Packer
         run: |
