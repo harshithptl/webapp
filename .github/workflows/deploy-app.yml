@@ -84,7 +84,12 @@ jobs:
         run: packer init generateAmi.pkr.hcl
 
       - name: Validate Packer Template
-        run: packer validate generateAmi.pkr.hcl
+        run: packer validate \
+              -var "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" \
+              -var "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" \
+              -var "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" \
+              -var "webapp_zip_path=./webapp.zip" \
+              generateAmi.pkr.hcl
 
       - name: Build AWS & GCP images
         env:
@@ -92,8 +97,9 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
         run: |
-          export POSTGRES_USER="${{ secrets.POSTGRES_USER }}"
-          export POSTGRES_PASSSWORD="${{ secrets.POSTGRES_PASSWORD }}"
-          export POSTGRES_DB="${{ secrets.POSTGRES_DB }}"
-    
-          packer build generateAmi.pkr.hcl
+          packer build \
+            -var "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" \
+            -var "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" \
+            -var "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" \
+            -var "webapp_zip_path=./webapp.zip" \
+              generateAmi.pkr.hcl

@@ -27,6 +27,26 @@ variable source_ami {
   default = "ami-04b4f1a9cf54c11d0"
 }
 
+variable "POSTGRES_USER" {
+  type    = string
+  default = "dummyUser"
+}
+
+variable "POSTGRES_PASSWORD" {
+  type    = string
+  default = "dummyPass"
+}
+
+variable "POSTGRES_DB" {
+  type    = string
+  default = "dummyDB"
+}
+
+variable "webapp_zip_path" {
+  type    = string
+  default = "./webapp.zip"
+}
+
 locals {
   ami_name = "webapp_${formatdate("YYYY_MM_DD", timestamp())}"
 }
@@ -73,7 +93,7 @@ build {
   }
 
   provisioner "file" {
-    source      = "./webapp.zip"
+    source      = var.webapp_zip_path
     destination = "/tmp/webapp.zip"
   }
 
@@ -84,9 +104,9 @@ build {
 
   provisioner "shell" {
     environment_vars = [
-      "POSTGRES_USER=${POSTGRES_USER}",
-      "POSTGRES_DB=${POSTGRES_DB}",
-      "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
+      "POSTGRES_USER=${var.POSTGRES_USER}",
+      "POSTGRES_PASSWORD=${var.POSTGRES_PASSWORD}",
+      "POSTGRES_DB=${var.POSTGRES_DB}"
     ]
     inline = [
       "chmod +x /tmp/setup.sh",
