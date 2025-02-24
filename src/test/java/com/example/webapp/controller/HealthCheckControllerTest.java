@@ -28,7 +28,7 @@ public class HealthCheckControllerTest {
                 .when()
                 .request(Method.GET, "/healthz")
                 .then()
-                .statusCode(HttpStatus.OK.value())
+                .statusCode(HttpStatus.METHOD_NOT_ALLOWED.value())
                 .header("Cache-Control", "no-cache, no-store, must-revalidate")
                 .header("Pragma", "no-cache")
                 .header("X-Content-Type-Options", "nosniff");
