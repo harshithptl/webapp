@@ -22,8 +22,8 @@ jobs:
 
       - name: Check Packer formatting
         run: |
-          packer fmt -check -diff /src/main/scripts
+          packer fmt -check -diff src/main/scripts
 
       - name: Validate Packer template
         run: |
-          packer validate /src/main/scripts
+          packer validate src/main/scripts
