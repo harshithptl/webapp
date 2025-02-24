@@ -5,7 +5,7 @@ echo "Updating package lists and upgrading packages"
 sudo apt update && sudo apt upgrade -y
 
 # Install necessary packages
-sudo apt-get install zip unzip postgresql postgresql-contrib open-jdk maven -y
+sudo apt-get install zip unzip postgresql postgresql-contrib default-jdk maven -y
 
 echo "Java and maven installed successfully"
 
@@ -17,7 +17,7 @@ sudo unzip /tmp/webapp.zip -d /opt/csye6225
 
 # Run Maven build to install dependencies and compile the application
 echo "Running Maven build..."
-cd /opt/csye6225
+cd /opt/csye6225/webapp
 mvn clean install -DskipTests
 
 
@@ -63,6 +63,7 @@ sudo systemctl restart postgresql
 
 # Set the PostgreSQL user for your application
 sudo -u postgres psql -c "CREATE USER csye6225user WITH ENCRYPTED PASSWORD '$PASSWORD';"
+sudo -u postgres psql -c "ALTER DATABASE csye6225db OWNER TO csye6225user;"
 sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE csye6225db TO csye6225user;"
 sudo -u postgres psql -c "ALTER ROLE csye6225user WITH LOGIN;"
 sudo -u postgres psql -c "ALTER ROLE csye6225user WITH CREATEDB;"
