@@ -7,8 +7,8 @@ After=network.target
 Type=simple
 WorkingDirectory=/opt/csye6225/webapp
 
-User=csye6225
-Group=csye6225
+User=csye6225user
+Group=csye6225grorup
 Environment="MAVEN_OPTS=-Xmx512m -Xms256m"
 ExecStart=/usr/bin/mvn spring-boot:run
 

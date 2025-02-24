@@ -5,7 +5,7 @@ echo "Updating package lists and upgrading packages"
 sudo apt update && sudo apt upgrade -y
 
 # Install necessary packages
-sudo apt-get install zip unzip postgresql postgresql-contrib openjdk-11-jdk maven -y
+sudo apt-get install zip unzip postgresql postgresql-contrib open-jdk maven -y
 
 echo "Java and maven installed successfully"
 
@@ -14,13 +14,20 @@ echo "Unzipping application to /opt/csye6225 directory"
 sudo mkdir -p /opt/csye6225
 sudo unzip /tmp/webapp.zip -d /opt/csye6225
 
+
+# Run Maven build to install dependencies and compile the application
+echo "Running Maven build..."
+cd /opt/csye6225
+mvn clean install -DskipTests
+
+
 # Create the application.properties file with PostgreSQL credentials
 echo "Creating application.properties..."
 sudo mkdir -p /opt/csye6225/webapp/src/main/resources
 sudo tee /opt/csye6225/webapp/src/main/resources/application.properties <<EOF >/dev/null
-spring.datasource.url=jdbc:postgresql://localhost:5432/\${POSTGRES_DB}
-spring.datasource.username=\${POSTGRES_USER}
-spring.datasource.password=\${POSTGRES_PASSWORD}
+spring.datasource.url=jdbc:postgresql://localhost:5432/${POSTGRES_DB}
+spring.datasource.username=${POSTGRES_USER}
+spring.datasource.password=${POSTGRES_PASSWORD}
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
