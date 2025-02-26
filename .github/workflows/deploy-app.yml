@@ -84,10 +84,12 @@ jobs:
         run: packer init ./src/main/scripts/generateAmi.pkr.hcl
 
       - name: Write GCP DEV Service Account Key
-        run: echo "${{ secrets.GCP_DEV_SERVICE_ACCOUNT_KEY }}" > gcp_dev_key.json
+        run: |
+          printf '%s' "${{ secrets.GCP_DEV_SERVICE_ACCOUNT_KEY }}" > gcp_dev_key.json
 
       - name: Write GCP DEMO Service Account Key
-        run: echo "${{ secrets.GCP_DEMO_SERVICE_ACCOUNT_KEY }}" > gcp_demo_key.json
+        run: |
+          printf '%s' "${{ secrets.GCP_DEMO_SERVICE_ACCOUNT_KEY }}" > gcp_demo_key.json
 
       - name: Validate Packer Template
         run: |
