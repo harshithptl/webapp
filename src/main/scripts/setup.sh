@@ -4,13 +4,14 @@
 echo "Updating package lists and upgrading packages"
 sudo apt update && sudo apt upgrade -y
 
-# Remove older Java versions
-echo "Removing older versions of Java"
-sudo apt-get remove --purge openjdk-11-jre-headless default-jre-headless -y
 sudo apt-get autoremove -y
 
 # Install necessary packages
 sudo apt-get install zip unzip postgresql postgresql-contrib openjdk-21-jdk maven -y
+
+# Remove older Java versions
+echo "Removing older versions of Java"
+sudo apt-get remove --purge openjdk-11-jre-headless default-jre-headless -y || true
 
 echo "Java and maven installed successfully"
 
