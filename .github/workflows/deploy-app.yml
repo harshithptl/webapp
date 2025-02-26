@@ -132,10 +132,13 @@ jobs:
             --format="value(name)")
 
           echo "Found image: ${IMAGE_NAME}"
-
-          gcloud compute images add-iam-policy-binding ${IMAGE_NAME} \
-            --project=${{ secrets.GCP_DEV_PROJECT_ID }} \
-            --member="serviceAccount:${{ secrets.GCP_DEMO_SERVICE_ACCOUNT_MAIL }}" \
-            --role="roles/compute.imageUser"
+          
+          NEW_IMAGE_NAME="webapp-demo-$(date +%Y%m%d%H%M%S)"
+          echo "Copying image as: ${NEW_IMAGE_NAME}"
+          
+          gcloud compute images copy ${NEW_IMAGE_NAME} \
+          --source-image=${IMAGE_NAME} \
+          --source-project=${{ secrets.GCP_DEV_PROJECT_ID }} \
+          --destination-project=${{ secrets.GCP_DEMO_PROJECT_ID }}
       
 
