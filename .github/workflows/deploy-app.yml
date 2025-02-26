@@ -90,13 +90,6 @@ jobs:
           name: "gcp_dev_key.json"
           json: ${{ secrets.GCP_DEV_SERVICE_ACCOUNT_KEY }}
 
-      - name: Create GCP DEMO Service Account Key JSON
-        id: gcp-demo
-        uses: jsdaniell/create-json@1.1.2
-        with:
-          name: "gcp_demo_key.json"
-          json: ${{ secrets.GCP_DEMO_SERVICE_ACCOUNT_KEY }}
-
       - name: Validate Packer Template
         run: |
           packer validate \
@@ -105,7 +98,6 @@ jobs:
             -var 'POSTGRES_DB=${{ secrets.POSTGRES_DB }}' \
             -var 'webapp_zip_path=./webapp.zip' \
             -var "gcp_service_account_key_file_dev=$(pwd)/gcp_dev_key.json" \
-            -var "gcp_service_account_key_file_demo=$(pwd)/gcp_demo_key.json" \
             src/main/scripts/generateAmi.pkr.hcl
 
       - name: Build AWS & GCP images
@@ -120,5 +112,30 @@ jobs:
             -var 'POSTGRES_DB=${{ secrets.POSTGRES_DB }}' \
             -var 'webapp_zip_path=./webapp.zip' \
             -var "gcp_service_account_key_file_dev=$(pwd)/gcp_dev_key.json" \
-            -var "gcp_service_account_key_file_demo=$(pwd)/gcp_demo_key.json" \
             src/main/scripts/generateAmi.pkr.hcl
+
+      - id: auth
+        name: Authenticating GCP Dev Account
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_DEV_SERVICE_ACCOUNT_KEY }}'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Share Custom Image with DEMO Project
+        run: |
+          IMAGE_NAME=$(gcloud compute images list \
+            --filter="name~^webapp-dev-" \
+            --sort-by=~creationTimestamp \
+            --limit=1 \
+            --format="value(name)")
+
+          echo "Found image: ${IMAGE_NAME}"
+
+          gcloud compute images add-iam-policy-binding ${IMAGE_NAME} \
+            --project=${{ secrets.GCP_DEV_PROJECT_ID }} \
+            --member="serviceAccount:${{ secrets.GCP_DEMO_SERVICE_ACCOUNT_MAIL }}" \
+            --role="roles/compute.imageUser"
+      
+
