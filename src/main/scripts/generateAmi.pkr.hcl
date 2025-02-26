@@ -58,8 +58,8 @@ variable "ami_users" {
 }
 
 locals {
-  ami_name = "webapp_aws_${formatdate("YYYY_MM_DD_HH_mm_ss", timestamp())}"
-  gcp_dev_name = "webapp-dev-${formatdate("YYYY-MM-DD-HH-mm-ss", timestamp())}"
+  ami_name      = "webapp_aws_${formatdate("YYYY_MM_DD_HH_mm_ss", timestamp())}"
+  gcp_dev_name  = "webapp-dev-${formatdate("YYYY-MM-DD-HH-mm-ss", timestamp())}"
   gcp_demo_name = "webapp-demo-${formatdate("YYYY-MM-DD-HH-mm-ss", timestamp())}"
 }
 
@@ -70,7 +70,7 @@ source "amazon-ebs" "ubuntu_app" {
   ssh_username  = var.ssh_username
 
   source_ami = var.source_ami
-  ami_users = var.ami_users
+  ami_users  = var.ami_users
 
   aws_polling {
     delay_seconds = 120
@@ -95,13 +95,13 @@ source "amazon-ebs" "ubuntu_app" {
 variable "gcp_project_id_dev" {
   type        = string
   description = "GCP DEV Project ID"
-  default = "development-452004"
+  default     = "development-452004"
 }
 
 variable "gcp_project_id_demo" {
   type        = string
   description = "GCP DEMO Project ID"
-  default = "prime-apricot-452004-d9"
+  default     = "prime-apricot-452004-d9"
 }
 
 variable "gcp_zone" {
@@ -123,8 +123,8 @@ variable "gcp_service_account_key_file_demo" {
 }
 
 variable gcp_source_image_family {
-  type        = string
-  default     = "ubuntu-2004-lts"
+  type    = string
+  default = "ubuntu-2004-lts"
 }
 
 variable gcp_instance_type {
@@ -134,8 +134,8 @@ variable gcp_instance_type {
 }
 
 variable gcp_disk_type {
-  type        = string
-  default     = "pd-standard"
+  type    = string
+  default = "pd-standard"
 }
 
 
