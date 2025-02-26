@@ -83,13 +83,19 @@ jobs:
       - name: Initialize Packer Template
         run: packer init ./src/main/scripts/generateAmi.pkr.hcl
 
-      - name: Write GCP DEV Service Account Key
-        run: |
-          printf '%s' "${{ secrets.GCP_DEV_SERVICE_ACCOUNT_KEY }}" > gcp_dev_key.json
+      - name: Create GCP DEV Service Account Key JSON
+        id: gcp-dev
+        uses: jsdaniell/create-json@1.1.2
+        with:
+          name: "gcp_dev_key.json"
+          json: ${{ secrets.GCP_DEV_SERVICE_ACCOUNT_KEY }}
 
-      - name: Write GCP DEMO Service Account Key
-        run: |
-          printf '%s' "${{ secrets.GCP_DEMO_SERVICE_ACCOUNT_KEY }}" > gcp_demo_key.json
+      - name: Create GCP DEMO Service Account Key JSON
+        id: gcp-demo
+        uses: jsdaniell/create-json@1.1.2
+        with:
+          name: "gcp_demo_key.json"
+          json: ${{ secrets.GCP_DEMO_SERVICE_ACCOUNT_KEY }}
 
       - name: Validate Packer Template
         run: |
