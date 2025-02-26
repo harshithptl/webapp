@@ -83,6 +83,12 @@ jobs:
       - name: Initialize Packer Template
         run: packer init ./src/main/scripts/generateAmi.pkr.hcl
 
+      - name: Write GCP DEV Service Account Key
+        run: echo "${{ secrets.GCP_DEV_SERVICE_ACCOUNT_KEY }}" > gcp_dev_key.json
+
+      - name: Write GCP DEMO Service Account Key
+        run: echo "${{ secrets.GCP_DEMO_SERVICE_ACCOUNT_KEY }}" > gcp_demo_key.json
+
       - name: Validate Packer Template
         run: |
           packer validate \
@@ -90,13 +96,9 @@ jobs:
             -var 'POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}' \
             -var 'POSTGRES_DB=${{ secrets.POSTGRES_DB }}' \
             -var 'webapp_zip_path=./webapp.zip' \
+            -var "gcp_service_account_key_file_dev=$(pwd)/gcp_dev_key.json" \
+            -var "gcp_service_account_key_file_demo=$(pwd)/gcp_demo_key.json" \
             src/main/scripts/generateAmi.pkr.hcl
-
-      - name: Write GCP DEV Service Account Key
-        run: echo "${{ secrets.GCP_DEV_SERVICE_ACCOUNT_KEY }}" > gcp_dev_key.json
-
-      - name: Write GCP DEMO Service Account Key
-        run: echo "${{ secrets.GCP_DEMO_SERVICE_ACCOUNT_KEY }}" > gcp_demo_key.json
 
       - name: Build AWS & GCP images
         env:
