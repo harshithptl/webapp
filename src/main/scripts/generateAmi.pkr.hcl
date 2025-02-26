@@ -4,6 +4,10 @@ packer {
       version = ">= 1.0.0, <2.0.0"
       source  = "github.com/hashicorp/amazon"
     }
+    googlecompute = {
+      source  = "github.com/hashicorp/googlecompute"
+      version = "~> 1"
+    }
   }
 }
 
@@ -47,8 +51,16 @@ variable "webapp_zip_path" {
   default = "./dummy.zip"
 }
 
+variable "ami_users" {
+  description = "List of AWS account IDs with which to share the AMI"
+  type        = list(string)
+  default     = ["225989346736", "277707141027"]
+}
+
 locals {
-  ami_name = "webapp_${formatdate("YYYY_MM_DD_HH_mm_ss", timestamp())}"
+  ami_name = "webapp_aws_${formatdate("YYYY_MM_DD_HH_mm_ss", timestamp())}"
+  gcp_dev_name = "webapp-dev-${formatdate("YYYY-MM-DD-HH-mm-ss", timestamp())}"
+  gcp_demo_name = "webapp-demo-${formatdate("YYYY-MM-DD-HH-mm-ss", timestamp())}"
 }
 
 # BUILDERS
@@ -58,6 +70,7 @@ source "amazon-ebs" "ubuntu_app" {
   ssh_username  = var.ssh_username
 
   source_ami = var.source_ami
+  ami_users = var.ami_users
 
   aws_polling {
     delay_seconds = 120
@@ -79,12 +92,87 @@ source "amazon-ebs" "ubuntu_app" {
   }
 }
 
+variable "gcp_project_id_dev" {
+  type        = string
+  description = "GCP DEV Project ID"
+  default = "development-452004"
+}
+
+variable "gcp_project_id_demo" {
+  type        = string
+  description = "GCP DEMO Project ID"
+  default = "prime-apricot-452004-d9"
+}
+
+variable "gcp_zone" {
+  type        = string
+  default     = "us-central1-a"
+  description = "The GCP zone for image build"
+}
+
+variable "gcp_service_account_key_file_dev" {
+  type        = string
+  description = "Path to the GCP DEV service account key JSON file"
+  default     = "./dummy_dev_key.json"
+}
+
+variable "gcp_service_account_key_file_demo" {
+  type        = string
+  description = "Path to the GCP DEMO service account key JSON file"
+  default     = "./dummy_demo_key.json"
+}
+
+variable gcp_source_image_family {
+  type        = string
+  default     = "ubuntu-2004-lts"
+}
+
+variable gcp_instance_type {
+  type        = string
+  description = "GCP instance type"
+  default     = "e2-micro"
+}
+
+variable gcp_disk_type {
+  type        = string
+  default     = "pd-standard"
+}
+
+
+source "googlecompute" "gcp_dev" {
+  project_id          = var.gcp_project_id_dev
+  zone                = var.gcp_zone
+  machine_type        = var.gcp_instance_type
+  ssh_username        = var.ssh_username
+  source_image_family = var.gcp_source_image_family
+  image_name          = local.gcp_dev_name
+  image_description   = "Custom app image for GCP DEV"
+  disk_size           = 25
+  disk_type           = var.gcp_disk_type
+  credentials_file    = var.gcp_service_account_key_file_dev
+}
+
+source "googlecompute" "gcp_demo" {
+  project_id          = var.gcp_project_id_demo
+  zone                = var.gcp_zone
+  machine_type        = var.gcp_instance_type
+  ssh_username        = var.ssh_username
+  source_image_family = var.gcp_source_image_family
+  image_name          = local.gcp_demo_name
+  image_description   = "Custom app image for GCP DEMO"
+  disk_size           = 25
+  disk_type           = var.gcp_disk_type
+  credentials_file    = var.gcp_service_account_key_file_demo
+}
+
 # PROVISIONERS
 build {
   name = "build-ubuntu-app"
 
   sources = [
-    "source.amazon-ebs.ubuntu_app"
+    "source.amazon-ebs.ubuntu_app",
+    "source.googlecompute.gcp_dev",
+    "source.googlecompute.gcp_demo"
   ]
 
   provisioner "file" {

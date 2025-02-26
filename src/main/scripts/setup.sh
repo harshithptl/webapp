@@ -5,7 +5,7 @@ echo "Updating package lists and upgrading packages"
 sudo apt update && sudo apt upgrade -y
 
 # Install necessary packages
-sudo apt-get install zip unzip postgresql postgresql-contrib default-jdk maven -y
+sudo apt-get install zip unzip postgresql postgresql-contrib openjdk-21-jdk maven -y
 
 echo "Java and maven installed successfully"
 

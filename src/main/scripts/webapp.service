@@ -1,11 +1,11 @@
 [Unit]
 Description=Webapp Service
-ConditionPathExists=/opt/csye6225/webapp/src/main/resources/application.properties
+ConditionPathExists=/opt/csye6225/src/main/resources/application.properties
 After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=/opt/csye6225/webapp
+WorkingDirectory=/opt/csye6225
 
 User=csye6225user
 Group=csye6225group
