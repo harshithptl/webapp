@@ -60,7 +60,6 @@ variable "ami_users" {
 locals {
   ami_name      = "webapp_aws_${formatdate("YYYY_MM_DD_HH_mm_ss", timestamp())}"
   gcp_dev_name  = "webapp-dev-${formatdate("YYYY-MM-DD-HH-mm-ss", timestamp())}"
-  gcp_demo_name = "webapp-demo-${formatdate("YYYY-MM-DD-HH-mm-ss", timestamp())}"
 }
 
 # BUILDERS
@@ -98,12 +97,6 @@ variable "gcp_project_id_dev" {
   default     = "development-452004"
 }
 
-variable "gcp_project_id_demo" {
-  type        = string
-  description = "GCP DEMO Project ID"
-  default     = "prime-apricot-452004-d9"
-}
-
 variable "gcp_zone" {
   type        = string
   default     = "us-central1-a"
@@ -114,12 +107,6 @@ variable "gcp_service_account_key_file_dev" {
   type        = string
   description = "Path to the GCP DEV service account key JSON file"
   default     = "./dummy_dev_key.json"
-}
-
-variable "gcp_service_account_key_file_demo" {
-  type        = string
-  description = "Path to the GCP DEMO service account key JSON file"
-  default     = "./dummy_demo_key.json"
 }
 
 variable gcp_source_image_family {
@@ -152,27 +139,13 @@ source "googlecompute" "gcp_dev" {
   credentials_file    = var.gcp_service_account_key_file_dev
 }
 
-source "googlecompute" "gcp_demo" {
-  project_id          = var.gcp_project_id_demo
-  zone                = var.gcp_zone
-  machine_type        = var.gcp_instance_type
-  ssh_username        = var.ssh_username
-  source_image_family = var.gcp_source_image_family
-  image_name          = local.gcp_demo_name
-  image_description   = "Custom app image for GCP DEMO"
-  disk_size           = 25
-  disk_type           = var.gcp_disk_type
-  credentials_file    = var.gcp_service_account_key_file_demo
-}
-
 # PROVISIONERS
 build {
   name = "build-ubuntu-app"
 
   sources = [
     "source.amazon-ebs.ubuntu_app",
-    "source.googlecompute.gcp_dev",
-    "source.googlecompute.gcp_demo"
+    "source.googlecompute.gcp_dev"
   ]
 
   provisioner "file" {
