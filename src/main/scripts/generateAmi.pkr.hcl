@@ -163,7 +163,7 @@ build {
     destination = "/tmp/webapp.service"
   }
 
-  provisioner "shell" {
+   provisioner "shell" {
     environment_vars = [
       "DEBIAN_FRONTEND=noninteractive",
       "CHECKPOINT_DISABLE=1",
