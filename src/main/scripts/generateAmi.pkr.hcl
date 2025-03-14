@@ -11,11 +11,6 @@ packer {
   }
 }
 
-variable "aws_region" {
-  type    = string
-  default = "us-east-1"
-}
-
 variable "instance_type" {
   type    = string
   default = "t2.small"
@@ -163,7 +158,7 @@ build {
     destination = "/tmp/webapp.service"
   }
 
-   provisioner "shell" {
+  provisioner "shell" {
     environment_vars = [
       "DEBIAN_FRONTEND=noninteractive",
       "CHECKPOINT_DISABLE=1",
