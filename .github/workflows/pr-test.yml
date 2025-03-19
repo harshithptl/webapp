@@ -48,7 +48,7 @@ jobs:
         run: mvn clean install -DskipTests
 
       - name: Run Unit Tests
-        run: mvn test
+        run: mvn test -Daws.region=${{ secrets.AWS_REGION }}
         env:
           SPRING_APPLICATION_JSON: |
             {
@@ -56,5 +56,6 @@ jobs:
               "spring.datasource.username": "${{ secrets.POSTGRES_USER }}",
               "spring.datasource.password": "${{ secrets.POSTGRES_PASSWORD}}",
               "spring.datasource.driver-class-name": "org.postgresql.Driver",
-              "spring.jpa.hibernate.ddl-auto": "update"
+              "spring.jpa.hibernate.ddl-auto": "update",
+              "app.s3.bucket.name": "dummy-bucket"
             }
