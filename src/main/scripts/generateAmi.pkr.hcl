@@ -4,10 +4,6 @@ packer {
       version = ">= 1.0.0, <2.0.0"
       source  = "github.com/hashicorp/amazon"
     }
-    googlecompute = {
-      source  = "github.com/hashicorp/googlecompute"
-      version = "~> 1"
-    }
   }
 }
 
@@ -31,21 +27,6 @@ variable source_ami {
   default = "ami-04b4f1a9cf54c11d0"
 }
 
-variable "POSTGRES_USER" {
-  type    = string
-  default = "dummyUser"
-}
-
-variable "POSTGRES_PASSWORD" {
-  type    = string
-  default = "dummyPass"
-}
-
-variable "POSTGRES_DB" {
-  type    = string
-  default = "dummyDB"
-}
-
 variable "webapp_zip_path" {
   type    = string
   default = "./dummy.zip"
@@ -58,8 +39,7 @@ variable "ami_users" {
 }
 
 locals {
-  ami_name     = "webapp_aws_${formatdate("YYYY_MM_DD_HH_mm_ss", timestamp())}"
-  gcp_dev_name = "webapp-dev-${formatdate("YYYY-MM-DD-HH-mm-ss", timestamp())}"
+  ami_name = "webapp_aws_${formatdate("YYYY_MM_DD_HH_mm_ss", timestamp())}"
 }
 
 # BUILDERS
@@ -91,61 +71,12 @@ source "amazon-ebs" "ubuntu_app" {
   }
 }
 
-variable "gcp_project_id_dev" {
-  type        = string
-  description = "GCP DEV Project ID"
-  default     = "development-452004"
-}
-
-variable "gcp_zone" {
-  type        = string
-  default     = "us-central1-a"
-  description = "The GCP zone for image build"
-}
-
-variable "gcp_service_account_key_file_dev" {
-  type        = string
-  description = "Path to the GCP DEV service account key JSON file"
-  default     = "./dummy_dev_key.json"
-}
-
-variable gcp_source_image_family {
-  type    = string
-  default = "ubuntu-2004-lts"
-}
-
-variable gcp_instance_type {
-  type        = string
-  description = "GCP instance type"
-  default     = "e2-micro"
-}
-
-variable gcp_disk_type {
-  type    = string
-  default = "pd-standard"
-}
-
-
-source "googlecompute" "gcp_dev" {
-  project_id          = var.gcp_project_id_dev
-  zone                = var.gcp_zone
-  machine_type        = var.gcp_instance_type
-  ssh_username        = var.ssh_username
-  source_image_family = var.gcp_source_image_family
-  image_name          = local.gcp_dev_name
-  image_description   = "Custom app image for GCP DEV"
-  disk_size           = 25
-  disk_type           = var.gcp_disk_type
-  credentials_file    = var.gcp_service_account_key_file_dev
-}
-
 # PROVISIONERS
 build {
   name = "build-ubuntu-app"
 
   sources = [
-    "source.amazon-ebs.ubuntu_app",
-    "source.googlecompute.gcp_dev"
+    "source.amazon-ebs.ubuntu_app"
   ]
 
   provisioner "file" {
@@ -167,9 +98,6 @@ build {
     environment_vars = [
       "DEBIAN_FRONTEND=noninteractive",
       "CHECKPOINT_DISABLE=1",
-      "POSTGRES_USER=${var.POSTGRES_USER}",
-      "POSTGRES_PASSWORD=${var.POSTGRES_PASSWORD}",
-      "POSTGRES_DB=${var.POSTGRES_DB}"
     ]
     inline = [
       "chmod +x /tmp/setup.sh",

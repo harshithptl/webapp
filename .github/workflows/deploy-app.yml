@@ -46,7 +46,7 @@ jobs:
         run: mvn clean install -DskipTests
 
       - name: Run Unit Tests
-        run: mvn test
+        run: mvn test -Daws.region=${{ secrets.AWS_DEFAULT_REGION }}
         env:
           SPRING_APPLICATION_JSON: |
             {
@@ -54,7 +54,8 @@ jobs:
               "spring.datasource.username": "${{ secrets.POSTGRES_USER }}",
               "spring.datasource.password": "${{ secrets.POSTGRES_PASSWORD}}",
               "spring.datasource.driver-class-name": "org.postgresql.Driver",
-              "spring.jpa.hibernate.ddl-auto": "update"
+              "spring.jpa.hibernate.ddl-auto": "update",
+              "app.s3.bucket.name": "dummy-bucket"
             }
 
   build-and-deploy:
@@ -83,62 +84,20 @@ jobs:
       - name: Initialize Packer Template
         run: packer init ./src/main/scripts/generateAmi.pkr.hcl
 
-      - name: Create GCP DEV Service Account Key JSON
-        id: gcp-dev
-        uses: jsdaniell/create-json@1.1.2
-        with:
-          name: "gcp_dev_key.json"
-          json: ${{ secrets.GCP_DEV_SERVICE_ACCOUNT_KEY }}
-
       - name: Validate Packer Template
         run: |
           packer validate \
-            -var 'POSTGRES_USER=${{ secrets.POSTGRES_USER }}' \
-            -var 'POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}' \
-            -var 'POSTGRES_DB=${{ secrets.POSTGRES_DB }}' \
             -var 'webapp_zip_path=./webapp.zip' \
-            -var "gcp_service_account_key_file_dev=$(pwd)/gcp_dev_key.json" \
             src/main/scripts/generateAmi.pkr.hcl
 
-      - name: Build AWS & GCP images
+      - name: Build AWS images
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
         run: |
           packer build \
-            -var 'POSTGRES_USER=${{ secrets.POSTGRES_USER }}' \
-            -var 'POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}' \
-            -var 'POSTGRES_DB=${{ secrets.POSTGRES_DB }}' \
             -var 'webapp_zip_path=./webapp.zip' \
-            -var "gcp_service_account_key_file_dev=$(pwd)/gcp_dev_key.json" \
             src/main/scripts/generateAmi.pkr.hcl
-
-      - id: auth
-        name: Authenticating GCP Dev Account
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: '${{ secrets.GCP_DEV_SERVICE_ACCOUNT_KEY }}'
-
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-
-      - name: Share Custom Image with DEMO Project
-        run: |
-          IMAGE_NAME=$(gcloud compute images list \
-            --filter="name~^webapp-dev-" \
-            --sort-by=~creationTimestamp \
-            --limit=1 \
-            --format="value(name)")
-
-          echo "Found image: ${IMAGE_NAME}"
-          
-          NEW_IMAGE_NAME="webapp-demo-$(date +%Y%m%d%H%M%S)"
-          echo "Copying image as: ${NEW_IMAGE_NAME}"
-          
-          gcloud compute images create ${NEW_IMAGE_NAME} \
-          --source-image=${IMAGE_NAME} \
-          --source-image-project=${{ secrets.GCP_DEV_PROJECT_ID }} \
-          --project=${{ secrets.GCP_DEMO_PROJECT_ID }}
       
 
