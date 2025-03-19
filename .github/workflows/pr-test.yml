@@ -48,7 +48,7 @@ jobs:
         run: mvn clean install -DskipTests
 
       - name: Run Unit Tests
-        run: mvn test -Daws.region=${{ secrets.AWS_REGION }}
+        run: mvn test -Daws.region=${{ secrets.AWS_DEFAULT_REGION }}
         env:
           SPRING_APPLICATION_JSON: |
             {

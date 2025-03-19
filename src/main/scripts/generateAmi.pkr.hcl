@@ -39,7 +39,7 @@ variable "ami_users" {
 }
 
 locals {
-  ami_name     = "webapp_aws_${formatdate("YYYY_MM_DD_HH_mm_ss", timestamp())}"
+  ami_name = "webapp_aws_${formatdate("YYYY_MM_DD_HH_mm_ss", timestamp())}"
 }
 
 # BUILDERS
