@@ -33,7 +33,7 @@ public class S3FileController {
             S3FileMetadata metadata = s3FileService.uploadFile(file);
             return createResponse(HttpStatus.CREATED, metadata);
         } catch (IOException e) {
-            return createResponse(HttpStatus.BAD_REQUEST, "Failed to upload file.");
+            return createResponse(HttpStatus.SERVICE_UNAVAILABLE, "Failed to upload file.");
         }
     }
 
