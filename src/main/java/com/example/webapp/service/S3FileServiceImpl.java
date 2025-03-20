@@ -39,15 +39,28 @@ public class S3FileServiceImpl implements S3FileService {
                 .key(key)
                 .build();
 
-        s3Client.putObject(
-                putRequest,
-                RequestBody.fromBytes(multipartFile.getBytes())
-        );
+        try {
+            s3Client.putObject(putRequest, RequestBody.fromBytes(multipartFile.getBytes()));
+        } catch (Exception e) {
+            throw new IOException("Failed to upload file to S3", e);
+        }
 
         S3FileMetadata fileMetadata = prepareS3FileMetadata(multipartFile, key);
 
-        return s3FileMetadataDao.save(fileMetadata);
+        try {
+            return s3FileMetadataDao.save(fileMetadata);
+        } catch (Exception dbEx) {
+            try {
+                s3Client.deleteObject(DeleteObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(key)
+                        .build());
+            } catch (Exception ignored) {
+            }
+            throw new IOException("Failed to save file metadata to database", dbEx);
+        }
     }
+
 
     private S3FileMetadata prepareS3FileMetadata(MultipartFile multipartFile, String key) {
         S3FileMetadata fileMetadata = new S3FileMetadata();
