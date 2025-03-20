@@ -45,7 +45,7 @@ public class S3FileServiceImpl implements S3FileService {
             throw new IOException("Failed to upload file to S3", e);
         }
 
-        S3FileMetadata fileMetadata = prepareS3FileMetadata(multipartFile, key);
+        S3FileMetadata fileMetadata = prepareS3FileMetadata(key);
 
         try {
             return s3FileMetadataDao.save(fileMetadata);
@@ -62,9 +62,9 @@ public class S3FileServiceImpl implements S3FileService {
     }
 
 
-    private S3FileMetadata prepareS3FileMetadata(MultipartFile multipartFile, String key) {
+    private S3FileMetadata prepareS3FileMetadata(String key) {
         S3FileMetadata fileMetadata = new S3FileMetadata();
-        fileMetadata.setFileName(multipartFile.getOriginalFilename());
+        fileMetadata.setFileName(key);
         fileMetadata.setUrl(bucketName + "/" + key);
         fileMetadata.setUploadDate(LocalDate.now(Clock.systemUTC()));
         return fileMetadata;
