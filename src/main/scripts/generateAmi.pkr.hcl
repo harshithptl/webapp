@@ -104,4 +104,22 @@ build {
       "sudo -E /tmp/setup.sh"
     ]
   }
+
+  # CloudWatch Agent setup
+  provisioner "file" {
+    source      = "./src/main/scripts/cloudwatch-agent-config.json"
+    destination = "/tmp/cloudwatch-agent-config.json"
+  }
+
+  provisioner "file" {
+    source      = "./src/main/scripts/cloudWatchSetup.sh"
+    destination = "/tmp/cloudWatchSetup.sh"
+  }
+
+  provisioner "shell" {
+    inline = [
+      "chmod +x /tmp/cloudWatchSetup.sh",
+      "sudo -E /tmp/cloudWatchSetup.sh"
+    ]
+  }
 }
