@@ -32,6 +32,12 @@ echo "Setting permissions for /opt/csye6225 directory"
 sudo chown -R csye6225user:csye6225group /opt/csye6225
 sudo chmod -R 755 /opt/csye6225
 
+# Set up log directory for application logs
+echo "Setting up log directory in /var/log/tomcat9"
+sudo mkdir -p /var/log/webapp
+sudo chown -R csye6225user:csye6225group /var/log/webapp
+sudo chmod -R 755 /var/log/webapp
+
 # Configure systemd service
 echo "Configuring systemd service"
 sudo cp /tmp/webapp.service /etc/systemd/system/webapp.service
