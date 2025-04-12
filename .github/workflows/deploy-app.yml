@@ -88,13 +88,22 @@ jobs:
             src/main/scripts/generateAmi.pkr.hcl
 
       - name: Build AWS images
+        id: packer_build
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
         run: |
-          packer build -var 'webapp_zip_path=./webapp.zip' src/main/scripts/generateAmi.pkr.hcl
-        id: packer_build
+          # Run the Packer build and save the output into a file
+          packer build -var 'webapp_zip_path=./webapp.zip' src/main/scripts/generateAmi.pkr.hcl | tee packer_build_output.txt
+          # Parse for an AMI ID; adjust the grep regex if needed
+          AMI_ID=$(grep -o "ami-[0-9a-fA-F]*" packer_build_output.txt | head -n 1)
+          echo "AMI_ID: $AMI_ID"
+          if [ -z "$AMI_ID" ]; then
+            echo "No AMI ID found, exiting."
+            exit 1
+          fi
+          echo "::set-output name=ami_id::$AMI_ID"
 
       - name: Share AMI with DEMO account
         env:
