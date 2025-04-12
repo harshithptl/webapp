@@ -89,14 +89,13 @@ jobs:
 
       - name: Build AWS images
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
         run: |
           packer build -var 'webapp_zip_path=./webapp.zip' src/main/scripts/generateAmi.pkr.hcl
         id: packer_build
 
-      # NEW STEP: Share the AMI with the DEMO account.
       - name: Share AMI with DEMO account
         env:
           IMAGE_ID: ${{ steps.packer_build.outputs.ami_id }}
