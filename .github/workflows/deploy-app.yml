@@ -129,8 +129,17 @@ jobs:
           --launch-template-data "{\"ImageId\":\"$IMAGE_ID\", \"InstanceType\":\"t2.small\"}" > lt_output.json
           
           NEW_VERSION=$(jq -r '.LaunchTemplateVersion.VersionNumber' lt_output.json)
-          echo "New Launch Template Version: $NEW_VERSION"
-          echo "::set-output name=new_lt_version::$NEW_VERSION"
+          echo "lt_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+
+
+      - name: Update Auto Scaling Group
+        env:
+          ASG_NAME: csye6225-app-asg
+        run: |
+          # Use LaunchTemplateId (not LaunchTemplateName) and the version we just created:
+          aws autoscaling update-auto-scaling-group \
+            --auto-scaling-group-name $ASG_NAME \
+            --launch-template "LaunchTemplateId=${{ secrets.LAUNCH_TEMPLATE_ID }},Version=${{ steps.new_lt.outputs.lt_version }}"
 
       - name: Start Instance Refresh
         id: instance_refresh
