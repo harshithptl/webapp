@@ -109,6 +109,7 @@ jobs:
         env:
           IMAGE_ID: ${{ steps.packer_build.outputs.ami_id }}
           DEMO_ACCOUNT_ID: ${{ secrets.DEMO_AWS_ACCOUNT_ID }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
         run: |
           aws ec2 modify-image-attribute --image-id $IMAGE_ID --launch-permission "Add=[{UserId=$DEMO_ACCOUNT_ID}]"
 
