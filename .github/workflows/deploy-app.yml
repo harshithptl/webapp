@@ -105,14 +105,6 @@ jobs:
           fi
           echo "::set-output name=ami_id::$AMI_ID"
 
-      - name: Share AMI with DEMO account
-        env:
-          IMAGE_ID: ${{ steps.packer_build.outputs.ami_id }}
-          DEMO_ACCOUNT_ID: ${{ secrets.DEMO_AWS_ACCOUNT_ID }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-        run: |
-          aws ec2 modify-image-attribute --image-id $IMAGE_ID --launch-permission "Add=[{UserId=$DEMO_ACCOUNT_ID}]"
-
       - name: Configure AWS CLI for DEMO account
         run: |
           aws configure set aws_access_key_id ${{ secrets.DEMO_AWS_ACCESS_KEY_ID }}
