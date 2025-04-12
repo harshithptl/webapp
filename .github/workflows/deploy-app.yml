@@ -105,62 +105,62 @@ jobs:
           fi
           echo "::set-output name=ami_id::$AMI_ID"
 
-    post-deploy:
-      name: Post-deploy Operations (DEMO)
-      runs-on: ubuntu-latest
-      needs: [ build-and-deploy ]
-      steps:
-        - name: Configure AWS CLI for DEMO Account
-          run: |
-            aws configure set aws_access_key_id ${{ secrets.DEMO_AWS_ACCESS_KEY_ID }}
-            aws configure set aws_secret_access_key ${{ secrets.DEMO_AWS_SECRET_ACCESS_KEY }}
-            aws configure set region ${{ secrets.AWS_DEFAULT_REGION }}
+  post-deploy:
+    name: Post-deploy Operations (DEMO)
+    runs-on: ubuntu-latest
+    needs: [ build-and-deploy ]
+    steps:
+      - name: Configure AWS CLI for DEMO Account
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.DEMO_AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.DEMO_AWS_SECRET_ACCESS_KEY }}
+          aws configure set region ${{ secrets.AWS_DEFAULT_REGION }}
 
-        - name: Create New Launch Template Version
-          id: new_lt
-          env:
-            IMAGE_ID: ${{ needs.build-and-deploy.outputs.ami_id }}
-            LAUNCH_TEMPLATE_ID: ${{ secrets.LAUNCH_TEMPLATE_ID }}
-          run: |
-            aws ec2 create-launch-template-version \
-            --launch-template-id $LAUNCH_TEMPLATE_ID \
-            --version-description "AMI update: $IMAGE_ID" \
-            --launch-template-data "{\"ImageId\":\"$IMAGE_ID\", \"InstanceType\":\"t2.small\"}" > lt_output.json
-            
-            NEW_VERSION=$(jq -r '.LaunchTemplateVersion.VersionNumber' lt_output.json)
-            echo "New Launch Template Version: $NEW_VERSION"
-            echo "::set-output name=new_lt_version::$NEW_VERSION"
+      - name: Create New Launch Template Version
+        id: new_lt
+        env:
+          IMAGE_ID: ${{ needs.build-and-deploy.outputs.ami_id }}
+          LAUNCH_TEMPLATE_ID: ${{ secrets.LAUNCH_TEMPLATE_ID }}
+        run: |
+          aws ec2 create-launch-template-version \
+          --launch-template-id $LAUNCH_TEMPLATE_ID \
+          --version-description "AMI update: $IMAGE_ID" \
+          --launch-template-data "{\"ImageId\":\"$IMAGE_ID\", \"InstanceType\":\"t2.small\"}" > lt_output.json
+          
+          NEW_VERSION=$(jq -r '.LaunchTemplateVersion.VersionNumber' lt_output.json)
+          echo "New Launch Template Version: $NEW_VERSION"
+          echo "::set-output name=new_lt_version::$NEW_VERSION"
 
-        - name: Start Instance Refresh
-          id: instance_refresh
-          env:
-            ASG_NAME: csye6225-app-asg
-          run: |
-            aws autoscaling start-instance-refresh \
-              --auto-scaling-group-name $ASG_NAME \
-              --preferences "MinHealthyPercentage=100,InstanceWarmup=120" \
-              > refresh_output.json
-            REFRESH_ID=$(jq -r '.InstanceRefreshId' refresh_output.json)
-            echo "Instance Refresh ID: $REFRESH_ID"
-            echo "::set-output name=refresh_id::$REFRESH_ID"
+      - name: Start Instance Refresh
+        id: instance_refresh
+        env:
+          ASG_NAME: csye6225-app-asg
+        run: |
+          aws autoscaling start-instance-refresh \
+            --auto-scaling-group-name $ASG_NAME \
+            --preferences "MinHealthyPercentage=100,InstanceWarmup=120" \
+            > refresh_output.json
+          REFRESH_ID=$(jq -r '.InstanceRefreshId' refresh_output.json)
+          echo "Instance Refresh ID: $REFRESH_ID"
+          echo "::set-output name=refresh_id::$REFRESH_ID"
 
-        - name: Wait for Instance Refresh Completion
-          env:
-            ASG_NAME: csye6225-app-asg
-            REFRESH_ID: ${{ steps.instance_refresh.outputs.refresh_id }}
-          run: |
-            STATUS="InProgress"
-            while [ "$STATUS" == "InProgress" ]; do
-              echo "Waiting for Instance Refresh to complete..."
-              sleep 30
-              STATUS=$(aws autoscaling describe-instance-refreshes --auto-scaling-group-name $ASG_NAME --query "InstanceRefreshes[?InstanceRefreshId=='${REFRESH_ID}'].Status" --output text)
-              echo "Current Instance Refresh Status: $STATUS"
-            done
-            if [ "$STATUS" != "Successful" ]; then
-              echo "ERROR: Instance Refresh failed with status $STATUS"
-              exit 1
-            fi
-            echo "Instance Refresh completed successfully."
+      - name: Wait for Instance Refresh Completion
+        env:
+          ASG_NAME: csye6225-app-asg
+          REFRESH_ID: ${{ steps.instance_refresh.outputs.refresh_id }}
+        run: |
+          STATUS="InProgress"
+          while [ "$STATUS" == "InProgress" ]; do
+            echo "Waiting for Instance Refresh to complete..."
+            sleep 30
+            STATUS=$(aws autoscaling describe-instance-refreshes --auto-scaling-group-name $ASG_NAME --query "InstanceRefreshes[?InstanceRefreshId=='${REFRESH_ID}'].Status" --output text)
+            echo "Current Instance Refresh Status: $STATUS"
+          done
+          if [ "$STATUS" != "Successful" ]; then
+            echo "ERROR: Instance Refresh failed with status $STATUS"
+            exit 1
+          fi
+          echo "Instance Refresh completed successfully."
 
-        - name: Post-deploy Cleanup
-          run: echo "Deployment and Instance Refresh complete."
+      - name: Post-deploy Cleanup
+        run: echo "Deployment and Instance Refresh complete."
