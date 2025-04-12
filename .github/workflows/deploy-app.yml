@@ -126,16 +126,13 @@ jobs:
             --output text)
           
           VERSION=$(aws ec2 create-launch-template-version \
-            --launch-template-id ${{ secrets.LAUNCH_TEMPLATE_ID }} \
-            --source-version $LATEST_VERSION \
-            --launch-template-data "{\"ImageId\":\"${{ steps.build_ami.outputs.ami_id }}\"}" \
-            --query 'LaunchTemplateVersion.VersionNumber' \
-            --output text)
-        
-        
-          NEW_VERSION=$(jq -r '.LaunchTemplateVersion.VersionNumber' lt_output.json)
-          echo "lt_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
-
+          --launch-template-id ${{ secrets.LAUNCH_TEMPLATE_ID }} \
+          --source-version $LATEST_VERSION \
+          --launch-template-data "{\"ImageId\":\"${{ steps.build_ami.outputs.ami_id }}\"}" \
+          --query 'LaunchTemplateVersion.VersionNumber' \
+          --output text)
+    
+          echo "lt_version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Update Auto Scaling Group
         env:
