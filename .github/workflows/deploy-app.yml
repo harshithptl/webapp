@@ -128,7 +128,7 @@ jobs:
           VERSION=$(aws ec2 create-launch-template-version \
           --launch-template-id ${{ secrets.LAUNCH_TEMPLATE_ID }} \
           --source-version $LATEST_VERSION \
-          --launch-template-data "{\"ImageId\":\"${{ steps.build_ami.outputs.ami_id }}\"}" \
+          --launch-template-data "{\"ImageId\":\"${{ needs.build-and-deploy.outputs.ami_id }}\"}" \
           --query 'LaunchTemplateVersion.VersionNumber' \
           --output text)
     
