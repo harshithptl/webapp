@@ -104,14 +104,12 @@ jobs:
         run: |
           aws ec2 modify-image-attribute --image-id $IMAGE_ID --launch-permission "Add=[{UserId=$DEMO_ACCOUNT_ID}]"
 
-      # NEW STEP: Reconfigure AWS CLI on the GitHub Runner to use DEMO account credentials.
       - name: Configure AWS CLI for DEMO account
         run: |
           aws configure set aws_access_key_id ${{ secrets.DEMO_AWS_ACCESS_KEY_ID }}
           aws configure set aws_secret_access_key ${{ secrets.DEMO_AWS_SECRET_ACCESS_KEY }}
           aws configure set region ${{ secrets.AWS_DEFAULT_REGION }}
 
-      # NEW STEP: Create a new Launch Template version with the latest AMI ID.
       - name: Create new Launch Template version
         id: new_lt
         env:
@@ -126,7 +124,6 @@ jobs:
           echo "New Launch Template Version: $NEW_VERSION"
           echo "::set-output name=new_lt_version::$NEW_VERSION"
 
-      # NEW STEP: Initiate an instance refresh on the Auto Scaling Group.
       - name: Start Instance Refresh
         id: instance_refresh
         env:
@@ -140,7 +137,6 @@ jobs:
           echo "Instance Refresh ID: $REFRESH_ID"
           echo "::set-output name=refresh_id::$REFRESH_ID"
 
-      # NEW STEP: Wait for Instance Refresh to complete.
       - name: Wait for Instance Refresh Completion
         env:
           ASG_NAME: csye6225-app-asg
