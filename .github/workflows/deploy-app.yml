@@ -98,7 +98,7 @@ jobs:
         run: |
           packer build -var 'webapp_zip_path=./webapp.zip' src/main/scripts/generateAmi.pkr.hcl | tee packer_build_output.txt
           # Parse for an AMI ID; adjust the grep regex if needed
-          AMI_ID=$(grep -o "ami-[0-9a-fA-F]*" packer_build_output.txt | head -n 1)
+          AMI_ID=$(grep -o "ami-[0-9a-fA-F]*" packer_build_output.txt | tail -n 1)
           echo "AMI_ID: $AMI_ID"
           if [ -z "$AMI_ID" ]; then
             echo "No AMI ID found, exiting."
