@@ -117,22 +117,51 @@ jobs:
           aws configure set aws_secret_access_key ${{ secrets.DEMO_AWS_SECRET_ACCESS_KEY }}
           aws configure set region ${{ secrets.AWS_DEFAULT_REGION }}
 
-      - name: Create New Launch Template Version
-        id: new_lt
+      - name: Ensure jq is installed
         run: |
-          LATEST_VERSION=$(aws ec2 describe-launch-template-versions \
-            --launch-template-id ${{ secrets.LAUNCH_TEMPLATE_ID }} \
-            --query 'LaunchTemplateVersions[-1].VersionNumber' \
+          if ! command -v jq &> /dev/null
+          then
+            echo "jq not found, installing..."
+            sudo apt-get update && sudo apt-get install -y jq
+          else
+            echo "jq is already installed"
+          fi
+
+      - name: Update Launch Template with New AMI (Preserving All Config)
+        id: new_lt
+        env:
+          LT_ID: ${{ secrets.LAUNCH_TEMPLATE_ID }}
+          REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          AMI_ID: ${{ needs.build-and-deploy.outputs.ami_id }}
+        run: |
+          echo "Fetching latest launch template version..."
+          LATEST_VERSION=$(aws ec2 describe-launch-templates \
+            --launch-template-ids "$LT_ID" \
+            --region "$REGION" \
+            --query 'LaunchTemplates[0].LatestVersionNumber' \
             --output text)
-          
-          VERSION=$(aws ec2 create-launch-template-version \
-          --launch-template-id ${{ secrets.LAUNCH_TEMPLATE_ID }} \
-          --source-version $LATEST_VERSION \
-          --launch-template-data "{\"ImageId\":\"${{ needs.build-and-deploy.outputs.ami_id }}\"}" \
-          --query 'LaunchTemplateVersion.VersionNumber' \
-          --output text)
-    
-          echo "lt_version=$VERSION" >> "$GITHUB_OUTPUT"
+
+          echo "Downloading launch template config for version $LATEST_VERSION..."
+          aws ec2 describe-launch-template-versions \
+            --launch-template-id "$LT_ID" \
+            --versions "$LATEST_VERSION" \
+            --region "$REGION" \
+            --query 'LaunchTemplateVersions[0].LaunchTemplateData' \
+            --output json > base.json
+
+          echo "Replacing ImageId with $AMI_ID in the launch template config..."
+          jq --arg AMI "$AMI_ID" '.ImageId = $AMI' base.json > new-data.json
+
+          echo "Creating new launch template version with updated AMI..."
+          NEW_VERSION=$(aws ec2 create-launch-template-version \
+            --launch-template-id "$LT_ID" \
+            --launch-template-data file://new-data.json \
+            --region "$REGION" \
+            --query 'LaunchTemplateVersion.VersionNumber' \
+            --output text)
+
+          echo "New Launch Template Version: $NEW_VERSION"
+          echo "lt_version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Update Auto Scaling Group
         env:
